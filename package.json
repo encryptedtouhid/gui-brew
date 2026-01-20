@@ -1,0 +1,26 @@
+{
+  "name": "guibrew",
+  "version": "1.0.0",
+  "description": "A GUI application for Homebrew management",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --enable-logging"
+  },
+  "keywords": [
+    "homebrew",
+    "brew",
+    "gui",
+    "electron",
+    "macos",
+    "package-manager"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

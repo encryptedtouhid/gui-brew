@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+  <title>GuiBrew - Homebrew Manager</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <img src="../../assets/icons/icon_128x128.png" alt="GuiBrew" class="logo-icon-img">
+        </div>
+        <div class="logo-info">
+          <span class="logo-text">guibrew</span>
+          <span class="logo-tagline">a native gui for homebrew 🍺</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <button class="nav-header" data-section="packages">
+            <span class="nav-header-content"><span class="nav-icon">📦</span> Packages</span>
+            <span class="nav-arrow">▼</span>
+          </button>
+          <div class="nav-items" data-section="packages">
+            <button class="nav-item active" data-view="installed">
+              <span class="nav-icon">📋</span><span>Installed</span>
+            </button>
+            <button class="nav-item" data-view="search">
+              <span class="nav-icon">🔍</span><span>Search</span>
+            </button>
+            <button class="nav-item" data-view="outdated">
+              <span class="nav-icon">⬆️</span><span>Updates</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <button class="nav-header" data-section="services">
+            <span class="nav-header-content"><span class="nav-icon">⚙️</span> Services</span>
+            <span class="nav-arrow">▼</span>
+          </button>
+          <div class="nav-items" data-section="services">
+            <button class="nav-item" data-view="services">
+              <span class="nav-icon">🔧</span><span>Manage Services</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <button class="nav-header" data-section="management">
+            <span class="nav-header-content"><span class="nav-icon">🗂️</span> Management</span>
+            <span class="nav-arrow">▼</span>
+          </button>
+          <div class="nav-items" data-section="management">
+            <button class="nav-item" data-view="taps">
+              <span class="nav-icon">🔌</span><span>Taps</span>
+            </button>
+            <button class="nav-item" data-view="pinned">
+              <span class="nav-icon">📌</span><span>Pinned</span>
+            </button>
+            <button class="nav-item" data-view="leaves">
+              <span class="nav-icon">🍃</span><span>Leaves</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <button class="nav-header" data-section="maintenance">
+            <span class="nav-header-content"><span class="nav-icon">🛠️</span> Maintenance</span>
+            <span class="nav-arrow">▼</span>
+          </button>
+          <div class="nav-items" data-section="maintenance">
+            <button class="nav-item" data-view="doctor">
+              <span class="nav-icon">🩺</span><span>Doctor</span>
+            </button>
+            <button class="nav-item" data-view="cleanup">
+              <span class="nav-icon">🧹</span><span>Cleanup</span>
+            </button>
+            <button class="nav-item" data-view="terminal">
+              <span class="nav-icon">💻</span><span>Terminal</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="footer-actions">
+          <button id="btn-update-brew" class="btn-icon" title="Update Homebrew">
+            🔄
+          </button>
+          <div id="brew-version" class="version-info">Loading...</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="content-header">
+        <h1 id="view-title">Installed Packages</h1>
+        <div class="header-actions">
+          <div id="loading-indicator" class="loading-indicator hidden">
+            <div class="spinner"></div>
+            <span>Loading...</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Views -->
+      <div class="content-body">
+        <!-- Installed View -->
+        <section id="view-installed" class="view active">
+          <div class="view-toolbar">
+            <div class="filter-group">
+              <button class="filter-btn active" data-filter="all">All</button>
+              <button class="filter-btn" data-filter="formulae">Formulae</button>
+              <button class="filter-btn" data-filter="casks">Casks</button>
+            </div>
+            <input type="text" id="installed-search" class="search-input" placeholder="Filter installed packages...">
+          </div>
+          <div id="installed-list" class="package-list"></div>
+        </section>
+
+        <!-- Search View -->
+        <section id="view-search" class="view">
+          <div class="view-toolbar">
+            <div class="search-bar">
+              <input type="text" id="search-input" class="search-input large" placeholder="Search for packages...">
+              <button id="search-btn" class="btn btn-primary">Search</button>
+            </div>
+          </div>
+          <div id="search-results" class="package-list">
+            <div class="empty-state">
+              <span class="empty-icon">🔍</span>
+              <p>Enter a search term to find packages</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Outdated View -->
+        <section id="view-outdated" class="view">
+          <div class="view-toolbar">
+            <button id="upgrade-all-btn" class="btn btn-primary">⬆️ Upgrade All</button>
+            <button id="refresh-outdated-btn" class="btn btn-secondary">🔄 Refresh</button>
+          </div>
+          <div id="outdated-list" class="package-list"></div>
+        </section>
+
+        <!-- Services View -->
+        <section id="view-services" class="view">
+          <div class="view-toolbar">
+            <button id="refresh-services-btn" class="btn btn-secondary">🔄 Refresh</button>
+          </div>
+          <div id="services-list" class="services-list"></div>
+        </section>
+
+        <!-- Taps View -->
+        <section id="view-taps" class="view">
+          <div class="view-toolbar">
+            <div class="input-group">
+              <input type="text" id="tap-input" class="search-input" placeholder="user/repo">
+              <button id="add-tap-btn" class="btn btn-primary">Add Tap</button>
+            </div>
+            <button id="refresh-taps-btn" class="btn btn-secondary">🔄 Refresh</button>
+          </div>
+          <div id="taps-list" class="taps-list"></div>
+        </section>
+
+        <!-- Pinned View -->
+        <section id="view-pinned" class="view">
+          <div class="view-toolbar">
+            <button id="refresh-pinned-btn" class="btn btn-secondary">🔄 Refresh</button>
+          </div>
+          <div id="pinned-list" class="package-list"></div>
+        </section>
+
+        <!-- Leaves View -->
+        <section id="view-leaves" class="view">
+          <div class="view-toolbar">
+            <button id="refresh-leaves-btn" class="btn btn-secondary">🔄 Refresh</button>
+            <button id="autoremove-btn" class="btn btn-warning">🗑️ Autoremove Unused</button>
+          </div>
+          <div id="leaves-list" class="package-list"></div>
+        </section>
+
+        <!-- Doctor View -->
+        <section id="view-doctor" class="view">
+          <div class="view-toolbar">
+            <button id="run-doctor-btn" class="btn btn-primary">🩺 Run Doctor</button>
+          </div>
+          <div id="doctor-output" class="terminal-output">
+            <div class="empty-state">
+              <span class="empty-icon">🩺</span>
+              <p>Click "Run Doctor" to check your Homebrew installation</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Cleanup View -->
+        <section id="view-cleanup" class="view">
+          <div class="view-toolbar">
+            <button id="cleanup-dry-btn" class="btn btn-secondary">👀 Preview Cleanup</button>
+            <button id="cleanup-btn" class="btn btn-warning">🧹 Run Cleanup</button>
+          </div>
+          <div id="cleanup-output" class="terminal-output">
+            <div class="empty-state">
+              <span class="empty-icon">🧹</span>
+              <p>Cleanup removes old versions and clears cache</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Terminal View -->
+        <section id="view-terminal" class="view">
+          <div class="view-toolbar">
+            <div class="input-group full-width">
+              <span class="input-prefix">brew</span>
+              <input type="text" id="terminal-input" class="search-input" placeholder="Enter brew command arguments...">
+              <button id="terminal-run-btn" class="btn btn-primary">Run</button>
+            </div>
+          </div>
+          <div id="terminal-history" class="terminal-output"></div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Package Details Modal -->
+    <div id="package-modal" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modal-package-name">Package Name</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-package-info" class="package-info"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="modal-uninstall-btn" class="btn btn-danger">Uninstall</button>
+          <button id="modal-deps-btn" class="btn btn-secondary">Show Dependencies</button>
+          <button id="modal-uses-btn" class="btn btn-secondary">Show Dependents</button>
+          <button id="modal-pin-btn" class="btn btn-secondary">Pin</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content modal-small">
+        <div class="modal-header">
+          <h2 id="confirm-title">Confirm</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p id="confirm-message"></p>
+        </div>
+        <div class="modal-footer">
+          <button id="confirm-cancel-btn" class="btn btn-secondary">Cancel</button>
+          <button id="confirm-ok-btn" class="btn btn-danger">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output Modal -->
+    <div id="output-modal" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h2 id="output-title">Output</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <pre id="output-content" class="terminal-output"></pre>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary modal-close-btn">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
