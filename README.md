@@ -99,7 +99,9 @@ Contributions are welcome! Feel free to submit issues and pull requests.
 
 ## License
 
-MIT License - feel free to use this project for personal or commercial purposes.
+This project is licensed for **personal and educational use only**. Commercial use is not permitted without prior written consent.
+
+See [LICENSE](LICENSE) for details.
 
 ## Author
 
