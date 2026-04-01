@@ -3,6 +3,7 @@ const state = {
   currentView: 'installed',
   installedPackages: { formulae: [], casks: [], all: [] },
   currentFilter: 'all',
+  outdatedPackages: [],
   currentPackage: null,
   isLoading: false
 };
@@ -41,6 +42,7 @@ const elements = {
 
   // Inputs
   installedSearch: document.getElementById('installed-search'),
+  outdatedSearch: document.getElementById('outdated-search'),
   searchInput: document.getElementById('search-input'),
   tapInput: document.getElementById('tap-input'),
   terminalInput: document.getElementById('terminal-input'),
@@ -253,21 +255,49 @@ async function loadOutdatedPackages() {
   try {
     const result = await window.brew.outdated();
     if (result.success) {
-      const allOutdated = result.all;
-      if (allOutdated.length === 0) {
-        elements.outdatedList.innerHTML = `<div class="empty-state"><span class="empty-icon">✅</span><p>All packages are up to date!</p></div>`;
-      } else {
-        elements.outdatedList.innerHTML = allOutdated.map(pkg =>
-          renderPackageItem(pkg, true, [{ action: 'upgrade', label: 'Upgrade', class: 'btn-success' }])
-        ).join('');
-      }
+      state.outdatedPackages = result.all;
+      elements.outdatedSearch.value = '';
+      filterAndRenderOutdated();
     } else {
-      elements.outdatedList.innerHTML = `<div class="empty-state"><span class="empty-icon">⚠️</span><p>Error: ${escapeHtml(result.error)}</p></div>`;
+      elements.outdatedList.textContent = '';
+      const errDiv = document.createElement('div');
+      errDiv.className = 'empty-state';
+      errDiv.innerHTML = '<span class="empty-icon">\u26a0\ufe0f</span>';
+      const p = document.createElement('p');
+      p.textContent = 'Error: ' + result.error;
+      errDiv.appendChild(p);
+      elements.outdatedList.appendChild(errDiv);
     }
   } catch (error) {
-    elements.outdatedList.innerHTML = `<div class="empty-state"><span class="empty-icon">⚠️</span><p>Error: ${escapeHtml(error.message)}</p></div>`;
+    elements.outdatedList.textContent = '';
+    const errDiv = document.createElement('div');
+    errDiv.className = 'empty-state';
+    errDiv.innerHTML = '<span class="empty-icon">\u26a0\ufe0f</span>';
+    const p = document.createElement('p');
+    p.textContent = 'Error: ' + error.message;
+    errDiv.appendChild(p);
+    elements.outdatedList.appendChild(errDiv);
   }
   setLoading(false);
+}
+
+function filterAndRenderOutdated() {
+  const searchTerm = elements.outdatedSearch.value.toLowerCase();
+  let packages = state.outdatedPackages;
+
+  if (searchTerm) {
+    packages = packages.filter(pkg => pkg.name.toLowerCase().includes(searchTerm));
+  }
+
+  if (packages.length === 0 && state.outdatedPackages.length === 0) {
+    elements.outdatedList.innerHTML = '<div class="empty-state"><span class="empty-icon">\u2705</span><p>All packages are up to date!</p></div>';
+  } else if (packages.length === 0) {
+    elements.outdatedList.innerHTML = '<div class="empty-state"><span class="empty-icon">\ud83d\udd0d</span><p>No matching outdated packages</p></div>';
+  } else {
+    elements.outdatedList.innerHTML = packages.map(pkg =>
+      renderPackageItem(pkg, true, [{ action: 'upgrade', label: 'Upgrade', class: 'btn-success' }])
+    ).join('');
+  }
 }
 
 async function upgradeAll() {
@@ -855,6 +885,7 @@ elements.searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter'
 elements.searchBtn.addEventListener('click', searchPackages);
 elements.upgradeAllBtn.addEventListener('click', upgradeAll);
 elements.refreshOutdatedBtn.addEventListener('click', loadOutdatedPackages);
+elements.outdatedSearch.addEventListener('input', filterAndRenderOutdated);
 elements.refreshServicesBtn.addEventListener('click', loadServices);
 elements.addTapBtn.addEventListener('click', addTap);
 elements.tapInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addTap(); });
